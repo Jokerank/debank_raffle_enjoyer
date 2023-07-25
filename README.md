@@ -1,6 +1,8 @@
-Preview - https://youtu.be/oryJspymoW8
+# DeBank Raffle Enjoyer
 
-1. Install Tampermonkey
+[Preview (YouTube)](https://youtu.be/oryJspymoW8)
+
+1. Install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
 2. Select a script in this repo. View the file and click the Raw button at the top of the file to view its source
 3. Copy the source
 4. Open Tampermonkey in your browser and click the Add Script tab (icon with a plus symbol)
