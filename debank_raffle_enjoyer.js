@@ -37,17 +37,22 @@ function startScript() {
     }
 
     async function startTask(element, index) {
-        let stats = false
+        let postTYPE = element.getElementsByClassName("RichTextView_prizeTitle__5wXAk")[0].innerHTML // Ворк
+        let buttonElement = element.querySelector('button');
+
         let skip = false
+        if (!buttonElement) {
+            skip = true
+        }
         if (!switchForCustomPrice) {
             skip = false
         } else {
-            if (document.getElementsByClassName(prizeTitle)[index].innerHTML == 'Custom Prize') {
+            if (postTYPE == 'Custom Prize') {
                 skip = true
             }
         }
         if (!skip) {
-            element.click()
+            buttonElement.click()
             await delay(2000)
             let qualifiedORnot = document.getElementsByClassName(qualified).length
             if (qualifiedORnot > 0) {
@@ -86,7 +91,6 @@ function startScript() {
                             close[0].click()
                             clearInterval(interval)
                             ++success
-                            stats = true
                             return true
                         } catch (err) {
                             console.log(err)
@@ -98,7 +102,6 @@ function startScript() {
                     }
                 }, 1000);
             }
-                return stats
             } else {
                 console.log(`Skipped because of custom prize - task: ${index}`)
             }
@@ -112,8 +115,8 @@ function startScript() {
 
             // Scroll the page to the specified coordinates
             window.scrollBy({
-            top: scrollToY,
-            behavior: 'smooth' // Use 'auto' for instant scrolling, or 'smooth' for smooth scrolling
+                top: scrollToY,
+                behavior: 'smooth' // Use 'auto' for instant scrolling, or 'smooth' for smooth scrolling
             });
         }
 
@@ -123,14 +126,15 @@ function startScript() {
             button.style.padding = "5px 2px";
             button.style.top = "320px";
             button.style.left = "10px";
-            let array = document.getElementsByClassName(joinTheDraw)
 
-            if (array.length != 0) {
-                console.log(`Loaded ${array.length} raffle/s`)
+            let drawCard = document.getElementsByClassName("RichTextView_drawCard__x-QGs")
+
+            if (drawCard.length != 0) {
+                console.log(`Loaded ${drawCard.length} raffle/s`)
 
                 let index = 0
 
-                for (let element of array) {
+                for (let element of drawCard) {
                     await startTask(element, index)
                     await delay(3000)
                     console.log(`Task done ${index}!`)
@@ -188,12 +192,18 @@ function startScript() {
 
             const switchButton = document.createElement("button");
             let onoff
-            if (switchForCustomPrice) {
-                onoff = "ON 👌"
-                switchButton.style.backgroundColor = "#fe815f";
-            } else {
-                onoff = "OFF 🥴"
-                switchButton.style.backgroundColor = "#b3247a";
+            
+            switch (switchForCustomPrice) {
+                case true:
+                    onoff = "ON 👌"
+                    switchButton.style.backgroundColor = "#fe815f";
+                    break;
+                case false:
+                    onoff = "OFF 🥴"
+                    switchButton.style.backgroundColor = "#b3247a";
+                    break;
+                default:
+                    break;
             }
 
             statisticsElement.appendChild(document.createElement("br"));
