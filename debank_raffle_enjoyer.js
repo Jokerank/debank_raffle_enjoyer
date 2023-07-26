@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.4.4
+// @version      0.4.5
 // @description  try to take over the world!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -22,7 +22,10 @@ function startScript() {
     // Function to execute the main script
     let switchForCustomPrice = false
 
+    let state = false
+
     function runMainScript() {
+    if(state) {
 
     let joinTheDraw = "Button_button__1yaWD Button_is_primary__1b4PX RichTextView_joinBtn__3dHYH" // Массив
     let follow = "Button_button__1yaWD Button_is_primary__1b4PX FollowButton_followBtn__DtOgj JoinDrawModal_joinStepBtn__DAjP0"
@@ -49,12 +52,13 @@ function startScript() {
         let skip = false
         if (!buttonElement) {
             skip = true
-        }
-        if (!switchForCustomPrice) {
-            skip = false
         } else {
-            if (postTYPE == 'Custom Prize') {
-                skip = true
+            if (!switchForCustomPrice) {
+                skip = false
+            } else {
+                if (postTYPE == 'Custom Prize') {
+                    skip = true
+                }
             }
         }
         if (!skip) {
@@ -107,7 +111,7 @@ function startScript() {
             }
             } else {
                 delayBetweenTasks = 0
-                console.log(`Skipped because of custom prize - task: ${index}`)
+                console.log(`Skipped because of custom prize or because already registered - task: ${index}`)
             }
 
     }
@@ -151,30 +155,50 @@ function startScript() {
             }
             simulateScroll(3000)
             await delay(2000)
+            if (state) {
+                main()
+            }
+        }
+        if (state) {
             main()
         }
-        main()
-        }
+        }}
 
         // Create the button element
         const button = document.createElement("button");
-        button.textContent = "Run DeBank Enjoyer 🫡";
-        button.style.position = "fixed";
-        button.style.top = "320px";
-        button.style.left = "12px";
-        button.style.backgroundColor = "#4CAF50";
-        button.style.color = "white";
-        button.style.padding = "5px 15px";
-        button.style.fontSize = "16px";
-        button.style.border = "none";
-        button.style.borderRadius = "10px";
-        button.style.zIndex = "9999"; // Set the z-index to make sure the button appears on top
+        function runButtonDefault(){
+            button.textContent = "Run DeBank Enjoyer 🫡";
+            button.style.position = "fixed";
+            button.style.top = "320px";
+            button.style.left = "12px";
+            button.style.backgroundColor = "#4CAF50";
+            button.style.color = "white";
+            button.style.padding = "5px 15px";
+            button.style.fontSize = "16px";
+            button.style.border = "none";
+            button.style.borderRadius = "10px";
+            button.style.zIndex = "9999"; // Set the z-index to make sure the button appears on top
+        }
+        runButtonDefault()
 
         // Append the button to the page
         document.body.appendChild(button);
 
         // Set the button's click event to run the main script
-        button.addEventListener("click", runMainScript);
+        button.addEventListener("click", function(){
+            switch (state) {
+                case false:
+                    state = true
+                    runMainScript()
+                    break;
+                case true:
+                    state = false
+                    runButtonDefault()
+                    break;
+                default:
+                    break;
+            }
+        });
 
         const statisticsElement = document.createElement("div");
         function updateStatisticsText() {
