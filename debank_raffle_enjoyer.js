@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.4.2
+// @version      0.4.4
 // @description  try to take over the world!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -36,8 +36,10 @@ function startScript() {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    let delayBetweenTasks = 3000
+
     async function startTask(element, index) {
-        let postTYPE = element.getElementsByClassName("RichTextView_prizeTitle__5wXAk")[0].innerHTML // Ворк
+        let postTYPE = element.getElementsByClassName(prizeTitle)[0].innerHTML // Ворк
         let buttonElement = element.querySelector('button');
 
         let skip = false
@@ -59,6 +61,7 @@ function startScript() {
                 console.log(`Task - ${index} does not meet the conditions, exit!`)
                 ++errors
                 document.getElementsByClassName(closeButton)[0].click()
+                delayBetweenTasks = 0
             } else {
                 try {
                     let followON = document.getElementsByClassName(follow)
@@ -91,18 +94,15 @@ function startScript() {
                             close[0].click()
                             clearInterval(interval)
                             ++success
-                            return true
                         } catch (err) {
                             console.log(err)
                             ++errors
-                            return false
                         }
-                    } else {
-                        return false
                     }
                 }, 1000);
             }
             } else {
+                delayBetweenTasks = 0
                 console.log(`Skipped because of custom prize - task: ${index}`)
             }
 
@@ -135,17 +135,17 @@ function startScript() {
                 let index = 0
 
                 for (let element of drawCard) {
+                    delayBetweenTasks = 3000
                     await startTask(element, index)
-                    await delay(3000)
+                    await delay(delayBetweenTasks)
                     console.log(`Task done ${index}!`)
                     ++index
                 }
             } else {
                 console.log("Scrolling to find more raffles")
-                simulateScroll(3000)
                 await delay(1000)
             }
-            simulateScroll(2000)
+            simulateScroll(3000)
             await delay(2000)
             main()
         }
