@@ -8,3 +8,5 @@
 4. Open Tampermonkey in your browser and click the Add Script tab (icon with a plus symbol)
 5. Paste the source into the script window and hit save
 6. Open DeBank page with raffles, hit green button and enjoy ;)
+
+[Telegram Group](https://t.me/investjk)
