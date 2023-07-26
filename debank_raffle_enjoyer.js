@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.5.5
 // @description  try to take over the world!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -20,9 +20,10 @@ function startScript() {
     let errors = 0
 
     // Function to execute the main script
-    let switchForCustomPrice = false
+    let switchForCustomPrice = true
 
     let state = false
+    let switchForRandT = true
 
     function runMainScript() {
         if(state) {
@@ -46,8 +47,16 @@ function startScript() {
             let delayBetweenTasks = 3000
 
             async function startTask(element, index) {
-                let postTYPE = element.getElementsByClassName(prizeTitle)[0].innerHTML // Ворк
+                let postTYPE
+                try {
+                    postTYPE = element.getElementsByClassName(prizeTitle)[0].innerHTML // Ворк
+                } catch (error) {
+                    
+                }
+                
                 let buttonElement = element.querySelector('button');
+                let trustButton = element.getElementsByClassName("ArticleContent_opIconWrap__3YjdX")[3]
+                let repostButton = element.getElementsByClassName("ArticleContent_opIconWrap__3YjdX")[1]
 
                 let skip = false
                 if (!buttonElement) {
@@ -56,12 +65,17 @@ function startScript() {
                     if (!switchForCustomPrice) {
                         skip = false
                     } else {
-                        if (postTYPE == 'Custom Prize') {
+                        if (postTYPE == 'Custom Prize' || postTYPE === undefined || null) {
                             skip = true
                         }
                     }
                 }
-                if (!skip) {
+                if (!skip && state) {
+                    await delay(200)
+                    if(switchForRandT) {
+                        if (!repostButton.innerHTML.includes("var(--color-primary)")) { repostButton.click() }
+                        if (!trustButton.innerHTML.includes("green")) { trustButton.click() }
+                    }
                     buttonElement.click()
                     await delay(2000)
                     let qualifiedORnot = document.getElementsByClassName(qualified).length
@@ -133,14 +147,14 @@ function startScript() {
                 button.style.padding = "5px 2px";
                 button.style.top = "320px";
                 button.style.left = "10px";
-                let drawCard = document.getElementsByClassName("RichTextView_drawCard__x-QGs")
+                let feedListItem = document.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
 
-                if (drawCard.length != 0) {
-                    console.log(`Loaded ${drawCard.length} raffle/s`)
+                if (feedListItem.length != 0) {
+                    console.log(`Loaded ${feedListItem.length} raffle/s`)
 
                     let index = 0
 
-                    for (let element of drawCard) {
+                    for (let element of feedListItem) {
                         delayBetweenTasks = 3000
                         await startTask(element, index)
                         await delay(delayBetweenTasks)
@@ -200,129 +214,154 @@ function startScript() {
     });
 
     const statisticsElement = document.createElement("div");
+    const elmwithstatistic = document.createElement("div");
+    statisticsElement.appendChild(elmwithstatistic);
 
     function updateStatisticsText() {
-        statisticsElement.textContent = `Stats:\nJoin in: ${success} raffles\nErrors: ${errors}\n`;
-        // Create the hyperlink element
-        const debank = document.createElement("a");
-        debank.href = "https://debank.com/profile/0xf890da5ab205741ebc49691eacfe127cffd90599/";
-        debank.textContent = "Follow ❤️ - debank";
-
-        statisticsElement.appendChild(document.createElement("br"));
-        statisticsElement.appendChild(debank);
-
-        const github = document.createElement("a");
-        github.href = "https://github.com/Jokerank";
-        github.textContent = "Follow ❤️ - github\n";
-
-        statisticsElement.appendChild(document.createElement("br"));
-        statisticsElement.appendChild(github);
-
-        const switchButton = document.createElement("button");
-        let onoff
-        
-        switch (switchForCustomPrice) {
-            case true:
-                onoff = "ON 👌"
-                switchButton.style.backgroundColor = "#fe815f";
-                break;
-            case false:
-                onoff = "OFF 🥴"
-                switchButton.style.backgroundColor = "#b3247a";
-                break;
-            default:
-                break;
-        }
-
-        statisticsElement.appendChild(document.createElement("br"));
-        statisticsElement.appendChild(switchButton);
-        switchButton.textContent = `Skip Custom Prize ${onoff}`
-        switchButton.style.borderRadius = "10px";
-        switchButton.style.color = "white";
-        switchButton.style.fontSize = "13px";
-        switchButton.style.width = "179px"
-        switchButton.style.height = "32px"
-        switchButton.addEventListener("click", switchdat)
-
-            function switchdat() {
-                if (switchForCustomPrice) {
-                    switchForCustomPrice = false
-                } else {
-                    switchForCustomPrice = true
-                }
-            }
-
-            async function followORunfollow(mode) {
-
-                function delay(ms) {
-                    return new Promise(resolve => setTimeout(resolve, ms));
-                }
-            
-                let htmlCode = document.getElementsByClassName("FollowButton_followBtnIcon__cZE9v")
-                if (htmlCode.length != 0) {
-                    for (let element of htmlCode) {
-                        await otpiskaNahuyORpodpiska(element, mode)
-                    }
-                } else {
-                    alert("Make sure you are on following or followers page")
-                }
-            
-                async function otpiskaNahuyORpodpiska(element, mode) {
-                    try {                
-                        let svgElement = element.querySelector('g');
-                        let followORnot = svgElement.getAttribute("clip-path")
-                        
-                        if (mode == "Unfollow") {
-                            if (followORnot == "url(#clip0_11356_89186)") {
-                                console.log("Already Unfollowed")
-                            } else {
-                                console.log("Unfollowed")
-                                await delay(200)
-                                element.click()
-                            }
-                        }
-                        if (mode == "Follow") {
-                            if (followORnot == "url(#clip0_11356_89186)") {
-                                console.log("Followed")
-                                await delay(200)
-                                element.click()
-                            } else {
-                                console.log("Already Followed")
-                            }
-                        }
-                    } catch (err) {
-                        console.log(err) 
-                    }
-                }
-            }
+        elmwithstatistic.textContent = `Stats:\nJoin in: ${success} raffles\nErrors: ${errors}\n`;
+    }
     
-            const friendsRemover = document.createElement("button");
-            statisticsElement.appendChild(document.createElement("br"));
-            statisticsElement.appendChild(friendsRemover);
-            friendsRemover.textContent = `Clean UP Friend List`
-            friendsRemover.style.backgroundColor = "#fe815f";
-            friendsRemover.style.borderRadius = "10px";
-            friendsRemover.style.color = "white";
-            friendsRemover.style.fontSize = "13px";
-            friendsRemover.style.width = "179px"
-            friendsRemover.style.height = "32px"
-            friendsRemover.addEventListener("click", function() {
-                followORunfollow("Unfollow");
-            })
-            const friendsAdd = document.createElement("button");
-            statisticsElement.appendChild(document.createElement("br"));
-            statisticsElement.appendChild(friendsAdd);
-            friendsAdd.textContent = `Add all followers to friends`
-            friendsAdd.style.backgroundColor = "#fe815f";
-            friendsAdd.style.borderRadius = "10px";
-            friendsAdd.style.color = "white";
-            friendsAdd.style.fontSize = "13px";
-            friendsAdd.style.width = "179px"
-            friendsAdd.style.height = "32px"
-            friendsAdd.addEventListener("click", function() {
-                followORunfollow("Follow");
-            })
+    // Create the hyperlink element
+    const debank = document.createElement("a");
+    debank.href = "https://debank.com/profile/0xf890da5ab205741ebc49691eacfe127cffd90599/";
+    debank.textContent = "Follow ❤️ - debank";
+
+    statisticsElement.appendChild(document.createElement("br"));
+    statisticsElement.appendChild(debank);
+
+    const github = document.createElement("a");
+    github.href = "https://github.com/Jokerank";
+    github.textContent = "Follow ❤️ - github\n";
+
+    statisticsElement.appendChild(document.createElement("br"));
+    statisticsElement.appendChild(github);
+
+    const switchButton = document.createElement("button");  
+
+    statisticsElement.appendChild(document.createElement("br"));
+    statisticsElement.appendChild(switchButton);
+    switchButton.textContent = `Skip Custom Price ON 👌`
+    switchButton.style.backgroundColor = "#fe815f";
+    switchButton.style.borderRadius = "10px";
+    switchButton.style.color = "white";
+    switchButton.style.fontSize = "13px";
+    switchButton.style.width = "179px"
+    switchButton.style.height = "32px"
+    switchButton.addEventListener("click", function() {
+            switch (switchForCustomPrice) {
+                case true:
+                    switchForCustomPrice = false
+                    switchButton.textContent = `Skip Custom Price ON 👌`
+                    switchButton.style.backgroundColor = "#fe815f";
+                    break;
+                case false:
+                    switchButton.textContent = `Skip Custom Price OFF 🥴`
+                    switchButton.style.backgroundColor = "#00c087";
+                    switchForCustomPrice = true
+                    break;
+                default:
+                    break;
+            }
+    })
+
+        async function followORunfollow(mode) {
+
+            function delay(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+        
+            let htmlCode = document.getElementsByClassName("FollowButton_followBtnIcon__cZE9v")
+            if (htmlCode.length != 0) {
+                for (let element of htmlCode) {
+                    await otpiskaNahuyORpodpiska(element, mode)
+                }
+            } else {
+                alert("Make sure you are on following or followers page")
+            }
+        
+            async function otpiskaNahuyORpodpiska(element, mode) {
+                try {                
+                    let svgElement = element.querySelector('g');
+                    let followORnot = svgElement.getAttribute("clip-path")
+                    
+                    if (mode == "Unfollow") {
+                        if (followORnot == "url(#clip0_11356_89186)") {
+                            console.log("Already Unfollowed")
+                        } else {
+                            console.log("Unfollowed")
+                            await delay(200)
+                            element.click()
+                        }
+                    }
+                    if (mode == "Follow") {
+                        if (followORnot == "url(#clip0_11356_89186)") {
+                            console.log("Followed")
+                            await delay(200)
+                            element.click()
+                        } else {
+                            console.log("Already Followed")
+                        }
+                    }
+                } catch (err) {
+                    console.log(err) 
+                }
+            }
         }
+
+        const friendsRemover = document.createElement("button");
+        statisticsElement.appendChild(document.createElement("br"));
+        statisticsElement.appendChild(friendsRemover);
+        friendsRemover.textContent = `Clean UP Friend List`
+        friendsRemover.style.backgroundColor = "#fe815f";
+        friendsRemover.style.borderRadius = "10px";
+        friendsRemover.style.color = "white";
+        friendsRemover.style.fontSize = "13px";
+        friendsRemover.style.width = "179px"
+        friendsRemover.style.height = "32px"
+        friendsRemover.addEventListener("click", function() {
+            followORunfollow("Unfollow");
+        })
+        const friendsAdd = document.createElement("button");
+        statisticsElement.appendChild(document.createElement("br"));
+        statisticsElement.appendChild(friendsAdd);
+        friendsAdd.textContent = `Add all followers to friends`
+        friendsAdd.style.backgroundColor = "#fe815f";
+        friendsAdd.style.borderRadius = "10px";
+        friendsAdd.style.color = "white";
+        friendsAdd.style.fontSize = "13px";
+        friendsAdd.style.width = "179px"
+        friendsAdd.style.height = "32px"
+        friendsAdd.addEventListener("click", function() {
+            followORunfollow("Follow");
+        })
+        
+        const repostANDtrust = document.createElement("button");
+        statisticsElement.appendChild(document.createElement("br"));
+        statisticsElement.appendChild(repostANDtrust);
+        repostANDtrust.textContent = `R&T ON`
+        repostANDtrust.style.backgroundColor = "#00c087";
+        repostANDtrust.style.borderRadius = "10px";
+        repostANDtrust.style.color = "white";
+        repostANDtrust.style.fontSize = "13px";
+        repostANDtrust.style.width = "90px"
+        repostANDtrust.style.height = "32px"
+        repostANDtrust.addEventListener("click", function() {
+            switch (switchForRandT) {
+                case true:
+                    switchForRandT = false
+                    repostANDtrust.textContent = `R&T OFF`
+                    repostANDtrust.style.backgroundColor = "#f63d3d";
+                    break;
+                case false:
+                    repostANDtrust.textContent = `R&T ON`
+                    repostANDtrust.style.backgroundColor = "#00c087";
+                    switchForRandT = true
+                    break;
+                default:
+                    break;
+            }
+        })
+    
         
     setInterval(() => {
         updateStatisticsText()
