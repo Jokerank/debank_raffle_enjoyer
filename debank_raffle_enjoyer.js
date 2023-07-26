@@ -6,6 +6,10 @@
 // @author       Jokerank
 // @match        *://*debank.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=debank.com
+// @updateURL        https://raw.githubusercontent.com/Jokerank/debank_raffle_enjoyer/main/debank_raffle_enjoyer.js
+// @downloadURL      https://raw.githubusercontent.com/Jokerank/debank_raffle_enjoyer/main/debank_raffle_enjoyer.js
+// @supportURL       https://github.com/Jokerank/debank_raffle_enjoyer/issues
+// @homepageURL      https://github.com/Jokerank/debank_raffle_enjoyer/
 // @grant        none
 // ==/UserScript==
 
