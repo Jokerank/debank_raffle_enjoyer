@@ -313,25 +313,25 @@ function startScript() {
         const friendsRemover = document.createElement("button");
         statisticsElement.appendChild(document.createElement("br"));
         statisticsElement.appendChild(friendsRemover);
-        friendsRemover.textContent = `Clean UP Friend List`
+        friendsRemover.textContent = `Bulk Unfollow`
         friendsRemover.style.backgroundColor = "#fe815f";
         friendsRemover.style.borderRadius = "10px";
         friendsRemover.style.color = "white";
-        friendsRemover.style.fontSize = "13px";
-        friendsRemover.style.width = "179px"
+        friendsRemover.style.fontSize = "12px";
+        friendsRemover.style.width = "90px"
         friendsRemover.style.height = "32px"
         friendsRemover.addEventListener("click", function() {
             followORunfollow("Unfollow");
         })
         const friendsAdd = document.createElement("button");
-        statisticsElement.appendChild(document.createElement("br"));
+        // statisticsElement.appendChild(document.createElement("br"));
         statisticsElement.appendChild(friendsAdd);
-        friendsAdd.textContent = `Add all followers to friends`
+        friendsAdd.textContent = `Bulk Follow`
         friendsAdd.style.backgroundColor = "#fe815f";
         friendsAdd.style.borderRadius = "10px";
         friendsAdd.style.color = "white";
-        friendsAdd.style.fontSize = "13px";
-        friendsAdd.style.width = "179px"
+        friendsAdd.style.fontSize = "12px";
+        friendsAdd.style.width = "90px"
         friendsAdd.style.height = "32px"
         friendsAdd.addEventListener("click", function() {
             followORunfollow("Follow");
