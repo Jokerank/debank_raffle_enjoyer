@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.5.6
-// @description  try to take over the world!
+// @version      0.5.7
+// @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=debank.com
@@ -226,17 +226,24 @@ function startScript() {
     // Create the hyperlink element
     const debank = document.createElement("a");
     debank.href = "https://debank.com/profile/0xf890da5ab205741ebc49691eacfe127cffd90599/";
-    debank.textContent = "Follow ❤️ - debank";
+    debank.textContent = "DeBank ❤️";
 
     statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(debank);
 
     const github = document.createElement("a");
     github.href = "https://github.com/Jokerank";
-    github.textContent = "Follow ❤️ - github\n";
+    github.textContent = "Github ❤️";
 
     statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(github);
+
+    const telegram = document.createElement("a");
+    telegram.href = "https://t.me/investjk";
+    telegram.textContent = "Telegram ❤️\n";
+
+    statisticsElement.appendChild(document.createElement("br"));
+    statisticsElement.appendChild(telegram);
 
     const switchButton = document.createElement("button");  
 
