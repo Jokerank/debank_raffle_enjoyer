@@ -226,7 +226,7 @@ function startScript() {
     // Create the hyperlink element
     const debank = document.createElement("a");
     debank.href = "https://debank.com/profile/0xf890da5ab205741ebc49691eacfe127cffd90599/";
-    debank.textContent = "DeBank ❤️";
+    debank.textContent = "DeBank ❤️ | ";
 
     statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(debank);
@@ -235,7 +235,7 @@ function startScript() {
     github.href = "https://github.com/Jokerank";
     github.textContent = "Github ❤️";
 
-    statisticsElement.appendChild(document.createElement("br"));
+    // statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(github);
 
     const telegram = document.createElement("a");
