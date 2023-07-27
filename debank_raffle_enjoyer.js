@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.6.0
+// @version      0.6.1
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -13,7 +13,7 @@
 // @grant        none
 // ==/UserScript==
 
-function startScript() {
+(function () {
     'use strict';
 
     let success = 0
@@ -41,7 +41,7 @@ function startScript() {
             let closeButton = "CommonModal_closeModalButton__1swng" // Кнопка для закрытия
             let qualified = "JoinDrawModal_inValidTag__3Sfee"
             let prizeTitle = "RichTextView_prizeTitle__5wXAk"
-            let FollowingLimitReached = "CommonModal_title__ctoFt"
+            let FollowingLimitReached = "FollowLimitModal_container__MJWF8"
 
             function delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
@@ -94,14 +94,13 @@ function startScript() {
                             let followON = document.getElementsByClassName(follow)
                             for (let buttons of followON) {
                                 buttons.click()
-                                // let limitElement = document.getElementsByClassName(FollowingLimitReached)
-                                // for (let element of limitElement) {
-                                //     if (element.innerHTML == 'Following limit reached') {
-                                //         alert("Following limit reached, clean up your friendlist 😎☝️")
-                                //         button.click()
-                                //         break
-                                //     }
-                                // }
+                                let limitElement = document.getElementsByClassName(FollowingLimitReached)[0]
+
+                                if (limitElement.innerHTML.includes('reached the maximum limit')) {
+                                    alert("Following limit reached, clean up your friendlist 😎☝️")
+                                    button.click()
+                                    break
+                                }
                             }
                         } catch (err) {
                             console.log("Seems already pressed")
@@ -153,7 +152,7 @@ function startScript() {
                     behavior: 'smooth' // Use 'auto' for instant scrolling, or 'smooth' for smooth scrolling
                 });
             }
-
+            
             async function main() {
                 if (state) {
                     button.textContent = "Running DeBank Enjoyer 🫡";
@@ -207,9 +206,6 @@ function startScript() {
     }
     runButtonDefault()
 
-    // Append the button to the page
-    // document.body.appendChild(button);
-
     // Set the button's click event to run the main script
     button.addEventListener("click", function(){
         switch (state) {
@@ -247,7 +243,6 @@ function startScript() {
     github.href = "https://github.com/Jokerank";
     github.textContent = "Github ❤️";
 
-    // statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(github);
 
     const telegram = document.createElement("a");
@@ -342,8 +337,8 @@ function startScript() {
         friendsRemover.addEventListener("click", function() {
             followORunfollow("Unfollow");
         })
+
         const friendsAdd = document.createElement("button");
-        // statisticsElement.appendChild(document.createElement("br"));
         statisticsElement.appendChild(friendsAdd);
         friendsAdd.textContent = `Bulk Follow`
         friendsAdd.style.backgroundColor = "#fe815f";
@@ -382,6 +377,7 @@ function startScript() {
                     break;
             }
         })
+        
         const scrollSpeedButton = document.createElement("button");
         statisticsElement.appendChild(scrollSpeedButton);
         scrollSpeedButton.textContent = `Scroll Speed 😎`
@@ -423,7 +419,7 @@ function startScript() {
 
     statisticsElement.style.whiteSpace = "pre-wrap";
     statisticsElement.style.position = "fixed";
-    statisticsElement.style.bottom = "250px";
+    statisticsElement.style.bottom = "210px";
     statisticsElement.style.left = "10px";
     statisticsElement.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
     statisticsElement.style.borderRadius = "10px";
@@ -434,5 +430,4 @@ function startScript() {
 
     // Append the statistics element to the page
     document.body.appendChild(statisticsElement);
-}
-window.onload = startScript
+})();
