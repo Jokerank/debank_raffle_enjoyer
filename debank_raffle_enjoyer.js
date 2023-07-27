@@ -24,6 +24,8 @@ function startScript() {
 
     let state = false
     let switchForRandT = true
+    let scrollSpeed = 3000
+    let scrollSpeedStages = 1
 
     function runMainScript() {
         if(state) {
@@ -165,7 +167,7 @@ function startScript() {
                     console.log("Scrolling to find more raffles")
                     await delay(1000)
                 }
-                simulateScroll(3000)
+                simulateScroll(scrollSpeed)
                 await delay(2000)
                 if (state) {
                     main()
@@ -364,6 +366,39 @@ function startScript() {
                     repostANDtrust.textContent = `R&T ON`
                     repostANDtrust.style.backgroundColor = "#00c087";
                     switchForRandT = true
+                    break;
+                default:
+                    break;
+            }
+        })
+        const scrollSpeedButton = document.createElement("button");
+        statisticsElement.appendChild(scrollSpeedButton);
+        scrollSpeedButton.textContent = `Scroll Speed 😎`
+        scrollSpeedButton.style.backgroundColor = "#00c087";
+        scrollSpeedButton.style.borderRadius = "10px";
+        scrollSpeedButton.style.color = "white";
+        scrollSpeedButton.style.fontSize = "12px";
+        scrollSpeedButton.style.width = "90px"
+        scrollSpeedButton.style.height = "32px"
+        scrollSpeedButton.addEventListener("click", function() {
+            switch (scrollSpeedStages) {
+                case 1:
+                    scrollSpeed = 2000
+                    scrollSpeedStages = 2
+                    scrollSpeedButton.textContent = `Scroll Speed 🤨`
+                    scrollSpeedButton.style.backgroundColor = "#d66853";                    
+                    break;
+                case 2:
+                    scrollSpeed = 1000
+                    scrollSpeedStages = 3
+                    scrollSpeedButton.textContent = `Scroll Speed 🐢`
+                    scrollSpeedButton.style.backgroundColor = "#bf8b32";
+                    break;
+                case 3:
+                    scrollSpeed = 3000
+                    scrollSpeedStages = 1
+                    scrollSpeedButton.textContent = `Scroll Speed 😎`
+                    scrollSpeedButton.style.backgroundColor = "#00c087";
                     break;
                 default:
                     break;
