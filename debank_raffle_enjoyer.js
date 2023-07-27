@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.5.5
+// @version      0.5.6
 // @description  try to take over the world!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -65,7 +65,9 @@ function startScript() {
                     if (!switchForCustomPrice) {
                         skip = false
                     } else {
-                        if (postTYPE == 'Custom Prize' || postTYPE === undefined || null) {
+                        if (postTYPE == 'Custom Prize' && switchForCustomPrice) {
+                            skip = true
+                        } else if (postTYPE === undefined || null) {
                             skip = true
                         }
                     }
@@ -241,7 +243,7 @@ function startScript() {
     statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(switchButton);
     switchButton.textContent = `Skip Custom Price ON 👌`
-    switchButton.style.backgroundColor = "#fe815f";
+    switchButton.style.backgroundColor = "#00c087";
     switchButton.style.borderRadius = "10px";
     switchButton.style.color = "white";
     switchButton.style.fontSize = "13px";
@@ -251,13 +253,13 @@ function startScript() {
             switch (switchForCustomPrice) {
                 case true:
                     switchForCustomPrice = false
-                    switchButton.textContent = `Skip Custom Price ON 👌`
+                    switchButton.textContent = `Skip Custom Price OFF 🥴`
                     switchButton.style.backgroundColor = "#fe815f";
                     break;
                 case false:
-                    switchButton.textContent = `Skip Custom Price OFF 🥴`
-                    switchButton.style.backgroundColor = "#00c087";
                     switchForCustomPrice = true
+                    switchButton.textContent = `Skip Custom Price ON 👌`
+                    switchButton.style.backgroundColor = "#00c087";
                     break;
                 default:
                     break;
