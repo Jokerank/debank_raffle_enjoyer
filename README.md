@@ -1,5 +1,9 @@
 # DeBank Raffle Enjoyer
 
+<p align="center">
+  <img src="https://i.imgur.com/VidZU2p.png" alt="Screenshot">
+</p>
+
 [Preview (YouTube)](https://youtu.be/oryJspymoW8)
 
 1. Install [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo)
