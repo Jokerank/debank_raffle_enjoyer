@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.5.8
+// @version      0.6.0
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -41,6 +41,7 @@ function startScript() {
             let closeButton = "CommonModal_closeModalButton__1swng" // Кнопка для закрытия
             let qualified = "JoinDrawModal_inValidTag__3Sfee"
             let prizeTitle = "RichTextView_prizeTitle__5wXAk"
+            let FollowingLimitReached = "CommonModal_title__ctoFt"
 
             function delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
@@ -76,10 +77,6 @@ function startScript() {
                 }
                 if (!skip && state) {
                     await delay(200)
-                    if(switchForRandT) {
-                        if (!repostButton.innerHTML.includes("var(--color-primary)")) { repostButton.click() }
-                        if (!trustButton.innerHTML.includes("green")) { trustButton.click() }
-                    }
                     buttonElement.click()
                     await delay(2000)
                     let qualifiedORnot = document.getElementsByClassName(qualified).length
@@ -89,10 +86,22 @@ function startScript() {
                         document.getElementsByClassName(closeButton)[0].click()
                         delayBetweenTasks = 0
                     } else {
+                        if(switchForRandT) {
+                            if (!repostButton.innerHTML.includes("var(--color-primary)")) { repostButton.click() }
+                            if (!trustButton.innerHTML.includes("green")) { trustButton.click() }
+                        }
                         try {
                             let followON = document.getElementsByClassName(follow)
                             for (let buttons of followON) {
                                 buttons.click()
+                                // let limitElement = document.getElementsByClassName(FollowingLimitReached)
+                                // for (let element of limitElement) {
+                                //     if (element.innerHTML == 'Following limit reached') {
+                                //         alert("Following limit reached, clean up your friendlist 😎☝️")
+                                //         button.click()
+                                //         break
+                                //     }
+                                // }
                             }
                         } catch (err) {
                             console.log("Seems already pressed")
@@ -146,12 +155,14 @@ function startScript() {
             }
 
             async function main() {
-                button.textContent = "Running DeBank Enjoyer 🫡";
-                button.style.backgroundColor = "#ef7c39";
-                button.style.padding = "5px 2px";
+                if (state) {
+                    button.textContent = "Running DeBank Enjoyer 🫡";
+                    button.style.backgroundColor = "#ef7c39";
+                    button.style.padding = "5px 2px";
+                }
                 let feedListItem = document.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
-
-                if (feedListItem.length != 0) {
+                
+                if (feedListItem.length != 0 && state) {
                     console.log(`Loaded ${feedListItem.length} raffle/s`)
 
                     let index = 0
@@ -167,9 +178,9 @@ function startScript() {
                     console.log("Scrolling to find more raffles")
                     await delay(1000)
                 }
-                simulateScroll(scrollSpeed)
-                await delay(2000)
                 if (state) {
+                    simulateScroll(scrollSpeed)
+                    await delay(2000)
                     main()
                 }
             }
