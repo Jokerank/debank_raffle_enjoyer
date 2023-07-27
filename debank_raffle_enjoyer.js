@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.5.7
+// @version      0.5.8
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -147,8 +147,6 @@ function startScript() {
                 button.textContent = "Running DeBank Enjoyer 🫡";
                 button.style.backgroundColor = "#ef7c39";
                 button.style.padding = "5px 2px";
-                button.style.top = "320px";
-                button.style.left = "10px";
                 let feedListItem = document.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
 
                 if (feedListItem.length != 0) {
@@ -181,23 +179,23 @@ function startScript() {
 
     // Create the button element
     const button = document.createElement("button");
-    function runButtonDefault(){
+    function runButtonDefault() {
         button.textContent = "Run DeBank Enjoyer 🫡";
         button.style.position = "fixed";
-        button.style.top = "320px";
-        button.style.left = "12px";
         button.style.backgroundColor = "#4CAF50";
         button.style.color = "white";
         button.style.padding = "5px 15px";
-        button.style.fontSize = "16px";
+        button.style.fontSize = "14px";
         button.style.border = "none";
+        button.style.width = "179px"
+        button.style.height = "32px"
         button.style.borderRadius = "10px";
         button.style.zIndex = "9999"; // Set the z-index to make sure the button appears on top
     }
     runButtonDefault()
 
     // Append the button to the page
-    document.body.appendChild(button);
+    // document.body.appendChild(button);
 
     // Set the button's click event to run the main script
     button.addEventListener("click", function(){
@@ -216,11 +214,12 @@ function startScript() {
     });
 
     const statisticsElement = document.createElement("div");
+    statisticsElement.appendChild(button);
     const elmwithstatistic = document.createElement("div");
     statisticsElement.appendChild(elmwithstatistic);
 
     function updateStatisticsText() {
-        elmwithstatistic.textContent = `Stats:\nJoin in: ${success} raffles\nErrors: ${errors}\n`;
+        elmwithstatistic.textContent = `\n\nStats:\nJoin in: ${success} raffles\nErrors: ${errors}\n`;
     }
     
     // Create the hyperlink element
@@ -253,7 +252,7 @@ function startScript() {
     switchButton.style.backgroundColor = "#00c087";
     switchButton.style.borderRadius = "10px";
     switchButton.style.color = "white";
-    switchButton.style.fontSize = "13px";
+    switchButton.style.fontSize = "12px";
     switchButton.style.width = "179px"
     switchButton.style.height = "32px"
     switchButton.addEventListener("click", function() {
