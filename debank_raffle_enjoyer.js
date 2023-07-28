@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.6.2
+// @version      0.6.3
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -181,11 +181,11 @@
                     }
                 } else {
                     console.log("Scrolling to find more raffles")
-                    await delay(1000)
+                    await delay(500)
                 }
                 if (state) {
                     simulateScroll(scrollSpeed)
-                    await delay(2000)
+                    await delay(1000)
                     main()
                 }
             }
