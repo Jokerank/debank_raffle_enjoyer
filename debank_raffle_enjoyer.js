@@ -54,7 +54,7 @@
             async function startTask(element, index) {
                 let postTYPE
                 try {
-                    postTYPE = element.getElementsByClassName(prizeTitle)[0].innerHTML // Ворк
+                    postTYPE = element.getElementsByClassName("RichTextView_prizeTitle__5wXAk")[0].outerText
                 } catch (error) {
                     
                 }
@@ -70,7 +70,7 @@
                     if (!switchForCustomPrice) {
                         skip = false
                     } else {
-                        if (postTYPE == 'Custom Prize' && switchForCustomPrice) {
+                        if (postTYPE == 'CUSTOM PRIZE' && switchForCustomPrice) {
                             skip = true
                         } else if (postTYPE === undefined || null) {
                             skip = true
