@@ -26,7 +26,9 @@
     let switchForRandT = true
     let scrollSpeed = 3000
     let scrollSpeedStages = 1
-
+    let delayStages = 1
+    let rateLimitforScript = 3000
+        
     function runMainScript() {
         if(state) {
 
@@ -47,7 +49,7 @@
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
 
-            let delayBetweenTasks = 3000
+            
 
             async function startTask(element, index) {
                 let postTYPE
@@ -99,6 +101,7 @@
                                 if (limitElement.innerHTML.includes('reached the maximum limit')) {
                                     alert("Following limit reached, clean up your friendlist 😎☝️")
                                     button.click()
+                                    state = false
                                     break
                                 }
                             }
@@ -135,11 +138,12 @@
                             }
                         }, 1000);
                     }
+                    delayBetweenTasks = rateLimitforScript
                     } else {
                         delayBetweenTasks = 0
                         console.log(`Skipped because of custom prize or because already registered - task: ${index}`)
                     }
-
+                   
             }
 
 
@@ -153,6 +157,8 @@
                 });
             }
             
+            let delayBetweenTasks = rateLimitforScript
+
             async function main() {
                 if (state) {
                     button.textContent = "Running DeBank Enjoyer 🫡";
@@ -167,9 +173,9 @@
                     let index = 0
 
                     for (let element of feedListItem) {
-                        delayBetweenTasks = 3000
                         await startTask(element, index)
                         await delay(delayBetweenTasks)
+                        console.log(delayBetweenTasks)
                         console.log(`Task done ${index}!`)
                         ++index
                     }
@@ -406,6 +412,47 @@
                     scrollSpeedStages = 1
                     scrollSpeedButton.textContent = `Scroll Speed 😎`
                     scrollSpeedButton.style.backgroundColor = "#00c087";
+                    break;
+                default:
+                    break;
+            }
+        })
+
+        const rateLimitButton = document.createElement("button");
+        statisticsElement.appendChild(document.createElement("br"));
+        statisticsElement.appendChild(rateLimitButton);
+        rateLimitButton.textContent = `Delay Task OFF`
+        rateLimitButton.style.backgroundColor = "#d66853";
+        rateLimitButton.style.borderRadius = "10px";
+        rateLimitButton.style.color = "white";
+        rateLimitButton.style.fontSize = "12px";
+        rateLimitButton.style.width = "90px"
+        rateLimitButton.style.height = "32px"
+        rateLimitButton.addEventListener("click", function() {
+            switch (delayStages) {
+                case 1:
+                    rateLimitforScript = 10000
+                    delayStages = 2
+                    rateLimitButton.textContent = `Delay Task 🐢`
+                    rateLimitButton.style.backgroundColor = "#f63d3d";
+                    break;
+                case 2:
+                    rateLimitforScript = 6000
+                    delayStages = 3
+                    rateLimitButton.textContent = `Delay Task 😈`
+                    rateLimitButton.style.backgroundColor = "#00c087";
+                    break;
+                case 3:
+                    rateLimitforScript = 15000
+                    delayStages = 4
+                    rateLimitButton.textContent = `Sloth mode 🦥`
+                    rateLimitButton.style.backgroundColor = "#5F5F5F";
+                    break;
+                case 4:
+                    rateLimitforScript = 3000
+                    delayStages = 1
+                    rateLimitButton.textContent = `Delay Task OFF`
+                    rateLimitButton.style.backgroundColor = "#d66853";
                     break;
                 default:
                     break;
