@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.6.3
+// @version      0.6.4
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -138,12 +138,15 @@
                             }
                         }, 1000);
                     }
-                    delayBetweenTasks = rateLimitforScript
+                    if (qualifiedORnot > 0) {
+                        delayBetweenTasks = 0
+                    } else {
+                        delayBetweenTasks = rateLimitforScript
+                    }
                     } else {
                         delayBetweenTasks = 0
                         console.log(`Skipped because of custom prize or because already registered - task: ${index}`)
                     }
-                   
             }
 
 
