@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.6.4
+// @version      0.7.0
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -23,14 +23,179 @@
     let switchForCustomPrice = true
 
     let state = false
-    let switchForRandT = true
+    let switchForRandT = false
     let scrollSpeed = 3000
     let scrollSpeedStages = 1
     let delayStages = 1
     let rateLimitforScript = 3000
+    let rateL = false
+
+    // Style
+    function updateStyle(element, textContent, color) {
+        element.textContent = textContent
+        element.style.backgroundColor = color
+    }
+
+    function updateSwitchState(element, switchStatus, name, arrayWithStatusONOFF) {
+        if (switchStatus) {
+            element.textContent = `${name} ${arrayWithStatusONOFF[0]}`
+            element.style.backgroundColor = "#00c087";
+        } else {
+            element.textContent = `${name} ${arrayWithStatusONOFF[1]}`
+            element.style.backgroundColor = "#f63d3d";
+        }
+    }
+
+    function styleButtons(element, name, originalColor, width, height) {
+        if (name != null || undefined) {
+            element.textContent = name
+        }
+        if (originalColor != null || undefined) {
+            element.style.backgroundColor = originalColor;
+        }
+        element.style.borderRadius = "10px";
+        element.style.color = "white";
+        element.style.fontSize = "11px";
+        if (width != null || undefined) {
+            element.style.width = width
+        } else {
+            element.style.width = "90px"
+        }
+        if (height != null || undefined) {
+            element.style.height = height
+        } else {
+            element.style.height = "32px"
+        }
+    }
+    // Style END
+    
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function requestListener() {
+        // Никуда ничего не отправляется, relax
+        // По дефолту выключен - Кнопка 429 Check
+        // Alert рейтлимита просто пример и выключение скрипта
+        // Тут можно очень грязные штуки делать, по типу редиректов реквестов, пытался делать сортировку только по гивам, но это привело к проблемам
+        // Сделал редирект новостной ленты с мейна на твинк, все работало кроме кое каких моментов, в объекте есть is_following и is_joined, т.е выводится лента сразу с
+        // заполненными значениями, если перезаписать их, скрипт будет пытаться зафолловиться (даже если подписан) или зайти (даже если уже зашел), и быстро ловить 429
+        // Т.е надо переписывать всю логику и как то запиливать подгрузку, пытался подменить пару фоновых запросов, но это не привело к подгрузке гивов.
+        // После вывода онли гивов не работает нативная подгрузка остальных постов 🫡
+
+        // Пример модификации запроса:
+        // let account = "тут ваш акк random_id и прочая хрень которая передается в запросах почти всех" // Найти можно в F12 - Network - Headers - Request Headers - Account:
+        // if (url.includes('https://api.debank.com/feed/list?limit=50&create_at=' && turn)) {
+        //         // Тут идет парс таймштампа который в оригинальном запросе
+        //         let regex = /create_at=([\d.]+)/;
+        //         let match = regex.exec(url);
+        //         let extractedValue = match ? match[1] : null;
+        // let address = "0xВашАдрес"
+        // // Тут вставляем хедерсы свои, в таком формате, переменную аккаунт берем сверху, костыльный обход x-api генерации
+        // let customHeaders = {
+        //     "accept": "*/*",
+        //     "accept-language": "",
+        //     "account": account,
+        //     "sec-ch-ua": "",
+        //     "sec-ch-ua-mobile": "",
+        //     "sec-ch-ua-platform": "",
+        //     "sec-fetch-dest": "",
+        //     "sec-fetch-mode": "",
+        //     "sec-fetch-site": "",
+        //     "source": "",
+        // }
+        //  // Редирект адреса на другой
+        //         url = `https://api.debank.com/feed/list?limit=50&create_at=${extractedValue}&user_id=${address}`
+        //         // Объединение существующих заголовков с вашими заголовками
+        //         const newHeaders = { ...options.headers, ...customHeaders };
         
+        //         // Переопределение объекта опций запроса с новыми заголовками
+        //         options = {
+        //             ...options,
+        //             headers: newHeaders,
+        //         };
+        
+        //         const response = await originalFetch(url, options);
+        //         const responseClone = await response.clone()
+        //         let responseDataObject;
+        //         try {
+        //             responseDataObject = await responseClone.json();
+        //         } catch (error) {
+        //             // Обработка ошибок при парсинге JSON
+        //             console.error('Error parsing JSON:', error);
+        //             return response; // Возвращаем оригинальный ответ без изменений
+        //         }
+        //         // console.log(responseDataObject);
+        //         // Важная функция, выполняет модификацию объекта который получен в запросе, с ним можно играть как душе угодно, выводить онли гивы как и писал, редактировать is_following, is_joined и т.д
+        //         function modifyArray(responseDataObject) {
+        //             return responseDataObject.data.feeds.map(item => {
+        //             let modifiedItem = { ...item };
+        //             // Модифицируем "is_following" и "is_joined"
+        //             if (modifiedItem.article.draw_id != undefined || null) {
+        //                 modifiedItem.article.creator.is_following = false
+        //                 modifiedItem.article.draw.is_joined = false
+        //             }
+        //             return modifiedItem;
+        //         })}
+               
+        //         modifyArray(responseDataObject);
+               
+        //         return new Response(JSON.stringify(responseDataObject), response);
+        //     }
+        // // Если придумаю что-то, запилю апдейт, но скорее всего это последний 🥲
+
+        const originalFetch = window.fetch;
+            window.fetch = async function (url, options) {
+                const response = await originalFetch(url, options)
+
+                if (rateL) {
+                    // console.log(response.status)
+
+                    if (response.status === 429) {
+                            alert("You got a rate limit, maybe u need to edit some settings 🥲 The script will be disabled 🫡")
+                            state = false
+                            styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
+                    }
+
+                    return response
+                } else {
+                    return response
+                }
+            }
+            return originalFetch(url, options);
+    }
+
     function runMainScript() {
         if(state) {
+
+            let howMuchSeen = 0
+            let arrayChecker = []
+
+            async function endChecker() {
+                    let arrayWithIndexes = []
+
+                    let list = document.getElementsByClassName("ListContainer_streamListWrap__3w26c ListContainer_isVisible__13Ye8")[0]
+                    let elementsWithIndex = list.querySelectorAll('div[data-index]');
+                    
+                    elementsWithIndex.forEach((element) => {
+                    let dataIndexValue = element.dataset.index;
+                        arrayWithIndexes.push(dataIndexValue)
+                    });
+
+                    if (arrayChecker.toString() === arrayWithIndexes.toString()) {
+                        arrayChecker = arrayWithIndexes.slice();
+                        ++howMuchSeen;
+                    } else {
+                        arrayChecker = arrayWithIndexes.slice();
+                        howMuchSeen = 0
+                    } // howMuchSeen 5 скорее всего сравнений достаточно, но оптимально останавливать после 3х поставил 5 для уверенности
+                    if (howMuchSeen >= 5) {
+                        alert("Looks like posts for today are over.")
+                        state = false
+                        styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
+                        howMuchSeen = 0
+                    }
+            }
 
             let joinTheDraw = "Button_button__1yaWD Button_is_primary__1b4PX RichTextView_joinBtn__3dHYH" // Массив
             let follow = "Button_button__1yaWD Button_is_primary__1b4PX FollowButton_followBtn__DtOgj JoinDrawModal_joinStepBtn__DAjP0"
@@ -45,16 +210,13 @@
             let prizeTitle = "RichTextView_prizeTitle__5wXAk"
             let FollowingLimitReached = "FollowLimitModal_container__MJWF8"
 
-            function delay(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
-            }
-
-            
-
+            let notifyOnlyOnce = 0
             async function startTask(element, index) {
                 let postTYPE
+                let thickDesc
                 try {
-                    postTYPE = element.getElementsByClassName("RichTextView_prizeTitle__5wXAk")[0].outerText
+                    postTYPE = element.getElementsByClassName(prizeTitle)[0].outerText
+                    thickDesc = element.getElementsByClassName("RichTextView_thickDesc__XyL5G")[0].outerText
                 } catch (error) {
                     
                 }
@@ -64,7 +226,22 @@
                 let repostButton = element.getElementsByClassName("ArticleContent_opIconWrap__3YjdX")[1]
 
                 let skip = false
-                if (!buttonElement) {
+                
+                // // Сомнительная штука т.к иногда посты внизу вылазят, с розыгрышами которые новые, если кто читает можете потестить и раскомментировать, остановка при 'Sorry, you did not get the prize'
+                // // По логике это должны быть старые посты, которые уже нет смысла просто так листать
+                // // Выделить весь блок + нажать CTRL+ /
+                // if (postTYPE == 'CASH PRIZE' && thickDesc == 'Sorry, you did not get the prize') {
+                //     if (notifyOnlyOnce == 0) {
+                //         alert("Looks like posts for today are over.")
+                //         ++notifyOnlyOnce
+                //     }
+                //     skip = true
+                //     state = false
+                //     styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
+                // }
+                // else if (!buttonElement) {
+
+                if (!buttonElement) { // И тут закомментировать строку
                     skip = true
                 } else {
                     if (!switchForCustomPrice) {
@@ -95,12 +272,18 @@
                         try {
                             let followON = document.getElementsByClassName(follow)
                             for (let buttons of followON) {
-                                buttons.click()
-                                let limitElement = document.getElementsByClassName(FollowingLimitReached)[0]
+                                let limitElement
+                                if (state) {
+                                    buttons.click()
+                                    limitElement = document.getElementsByClassName(FollowingLimitReached)[0]
+                                }
 
                                 if (limitElement.innerHTML.includes('reached the maximum limit')) {
-                                    alert("Following limit reached, clean up your friendlist 😎☝️")
-                                    button.click()
+                                    if (notifyOnlyOnce == 0) {
+                                        alert("Following limit reached, clean up your friendlist 😎☝️")
+                                        button.click()
+                                        ++notifyOnlyOnce
+                                    }
                                     state = false
                                     break
                                 }
@@ -164,14 +347,12 @@
 
             async function main() {
                 if (state) {
-                    button.textContent = "Running DeBank Enjoyer 🫡";
-                    button.style.backgroundColor = "#ef7c39";
-                    button.style.padding = "5px 2px";
+                    styleButtons(button, "Running DeBank Enjoyer 🫡", "#ef7c39", "180px", "32px")
                 }
                 let feedListItem = document.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
                 
                 if (feedListItem.length != 0 && state) {
-                    console.log(`Loaded ${feedListItem.length} raffle/s`)
+                    console.log(`Loaded ${feedListItem.length} post/s`)
 
                     let index = 0
 
@@ -188,6 +369,7 @@
                 }
                 if (state) {
                     simulateScroll(scrollSpeed)
+                    endChecker()
                     await delay(1000)
                     main()
                 }
@@ -201,16 +383,8 @@
     // Create the button element
     const button = document.createElement("button");
     function runButtonDefault() {
-        button.textContent = "Run DeBank Enjoyer 🫡";
+        styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
         button.style.position = "fixed";
-        button.style.backgroundColor = "#4CAF50";
-        button.style.color = "white";
-        button.style.padding = "5px 15px";
-        button.style.fontSize = "14px";
-        button.style.border = "none";
-        button.style.width = "179px"
-        button.style.height = "32px"
-        button.style.borderRadius = "10px";
         button.style.zIndex = "9999"; // Set the z-index to make sure the button appears on top
     }
     runButtonDefault()
@@ -265,24 +439,18 @@
 
     statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(switchButton);
-    switchButton.textContent = `Skip Custom Price ON 👌`
-    switchButton.style.backgroundColor = "#00c087";
-    switchButton.style.borderRadius = "10px";
-    switchButton.style.color = "white";
-    switchButton.style.fontSize = "12px";
-    switchButton.style.width = "179px"
-    switchButton.style.height = "32px"
+
+    styleButtons(switchButton, "Skip Custom Price ON 👌", "#00c087", "180px", "32px")
+
     switchButton.addEventListener("click", function() {
             switch (switchForCustomPrice) {
                 case true:
                     switchForCustomPrice = false
-                    switchButton.textContent = `Skip Custom Price OFF 🥴`
-                    switchButton.style.backgroundColor = "#fe815f";
+                    updateStyle(switchButton, `Skip Custom Price OFF 🥴`, "#fe815f")
                     break;
                 case false:
                     switchForCustomPrice = true
-                    switchButton.textContent = `Skip Custom Price ON 👌`
-                    switchButton.style.backgroundColor = "#00c087";
+                    updateStyle(switchButton, `Skip Custom Price ON 👌`, "#00c087")
                     break;
                 default:
                     break;
@@ -290,10 +458,6 @@
     })
 
         async function followORunfollow(mode) {
-
-            function delay(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
-            }
         
             let htmlCode = document.getElementsByClassName("FollowButton_followBtnIcon__cZE9v")
             if (htmlCode.length != 0) {
@@ -336,26 +500,18 @@
         const friendsRemover = document.createElement("button");
         statisticsElement.appendChild(document.createElement("br"));
         statisticsElement.appendChild(friendsRemover);
-        friendsRemover.textContent = `Bulk Unfollow`
-        friendsRemover.style.backgroundColor = "#fe815f";
-        friendsRemover.style.borderRadius = "10px";
-        friendsRemover.style.color = "white";
-        friendsRemover.style.fontSize = "12px";
-        friendsRemover.style.width = "90px"
-        friendsRemover.style.height = "32px"
+
+        styleButtons(friendsRemover, `Bulk Unfollow`, "#fe815f")
+
         friendsRemover.addEventListener("click", function() {
             followORunfollow("Unfollow");
         })
 
         const friendsAdd = document.createElement("button");
         statisticsElement.appendChild(friendsAdd);
-        friendsAdd.textContent = `Bulk Follow`
-        friendsAdd.style.backgroundColor = "#fe815f";
-        friendsAdd.style.borderRadius = "10px";
-        friendsAdd.style.color = "white";
-        friendsAdd.style.fontSize = "12px";
-        friendsAdd.style.width = "90px"
-        friendsAdd.style.height = "32px"
+
+        styleButtons(friendsAdd, `Bulk Follow`, "#fe815f")
+
         friendsAdd.addEventListener("click", function() {
             followORunfollow("Follow");
         })
@@ -363,24 +519,19 @@
         const repostANDtrust = document.createElement("button");
         statisticsElement.appendChild(document.createElement("br"));
         statisticsElement.appendChild(repostANDtrust);
-        repostANDtrust.textContent = `R&T ON`
-        repostANDtrust.style.backgroundColor = "#00c087";
-        repostANDtrust.style.borderRadius = "10px";
-        repostANDtrust.style.color = "white";
-        repostANDtrust.style.fontSize = "13px";
-        repostANDtrust.style.width = "90px"
-        repostANDtrust.style.height = "32px"
+        
+        updateSwitchState(repostANDtrust, switchForRandT, "R&T", ["ON", "OFF"])
+        styleButtons(repostANDtrust, null, null)
+
         repostANDtrust.addEventListener("click", function() {
             switch (switchForRandT) {
                 case true:
                     switchForRandT = false
-                    repostANDtrust.textContent = `R&T OFF`
-                    repostANDtrust.style.backgroundColor = "#f63d3d";
+                    updateSwitchState(repostANDtrust, switchForRandT, "R&T", ["ON", "OFF"])
                     break;
                 case false:
-                    repostANDtrust.textContent = `R&T ON`
-                    repostANDtrust.style.backgroundColor = "#00c087";
                     switchForRandT = true
+                    updateSwitchState(repostANDtrust, switchForRandT, "R&T", ["ON", "OFF"])
                     break;
                 default:
                     break;
@@ -389,32 +540,25 @@
         
         const scrollSpeedButton = document.createElement("button");
         statisticsElement.appendChild(scrollSpeedButton);
-        scrollSpeedButton.textContent = `Scroll Speed 😎`
-        scrollSpeedButton.style.backgroundColor = "#00c087";
-        scrollSpeedButton.style.borderRadius = "10px";
-        scrollSpeedButton.style.color = "white";
-        scrollSpeedButton.style.fontSize = "12px";
-        scrollSpeedButton.style.width = "90px"
-        scrollSpeedButton.style.height = "32px"
+
+        styleButtons(scrollSpeedButton, `Scroll Speed 😎`, "#00c087")
+
         scrollSpeedButton.addEventListener("click", function() {
             switch (scrollSpeedStages) {
                 case 1:
                     scrollSpeed = 2000
                     scrollSpeedStages = 2
-                    scrollSpeedButton.textContent = `Scroll Speed 🤨`
-                    scrollSpeedButton.style.backgroundColor = "#d66853";                    
+                    updateStyle(scrollSpeedButton, `Scroll Speed 🤨`, "#d66853")                    
                     break;
                 case 2:
                     scrollSpeed = 1000
                     scrollSpeedStages = 3
-                    scrollSpeedButton.textContent = `Scroll Speed 🐢`
-                    scrollSpeedButton.style.backgroundColor = "#bf8b32";
+                    updateStyle(scrollSpeedButton, `Scroll Speed 🐢`, "#bf8b32")
                     break;
                 case 3:
                     scrollSpeed = 3000
                     scrollSpeedStages = 1
-                    scrollSpeedButton.textContent = `Scroll Speed 😎`
-                    scrollSpeedButton.style.backgroundColor = "#00c087";
+                    updateStyle(scrollSpeedButton, `Scroll Speed 😎`, "#00c087")
                     break;
                 default:
                     break;
@@ -424,38 +568,52 @@
         const rateLimitButton = document.createElement("button");
         statisticsElement.appendChild(document.createElement("br"));
         statisticsElement.appendChild(rateLimitButton);
-        rateLimitButton.textContent = `Delay Task OFF`
-        rateLimitButton.style.backgroundColor = "#d66853";
-        rateLimitButton.style.borderRadius = "10px";
-        rateLimitButton.style.color = "white";
-        rateLimitButton.style.fontSize = "12px";
-        rateLimitButton.style.width = "90px"
-        rateLimitButton.style.height = "32px"
+
+        styleButtons(rateLimitButton, `Delay Task OFF`, "#fe815f")
+
         rateLimitButton.addEventListener("click", function() {
             switch (delayStages) {
                 case 1:
                     rateLimitforScript = 10000
                     delayStages = 2
-                    rateLimitButton.textContent = `Delay Task 🐢`
-                    rateLimitButton.style.backgroundColor = "#f63d3d";
+                    updateStyle(rateLimitButton, `Delay Task 🐢`, "#f63d3d")
                     break;
                 case 2:
                     rateLimitforScript = 6000
                     delayStages = 3
-                    rateLimitButton.textContent = `Delay Task 😈`
-                    rateLimitButton.style.backgroundColor = "#00c087";
+                    updateStyle(rateLimitButton, `Delay Task 😈`, "#00c087")
                     break;
                 case 3:
                     rateLimitforScript = 15000
                     delayStages = 4
-                    rateLimitButton.textContent = `Sloth mode 🦥`
-                    rateLimitButton.style.backgroundColor = "#5F5F5F";
+                    updateStyle(rateLimitButton, `Sloth mode 🦥`, "#5F5F5F")
                     break;
                 case 4:
                     rateLimitforScript = 3000
                     delayStages = 1
-                    rateLimitButton.textContent = `Delay Task OFF`
-                    rateLimitButton.style.backgroundColor = "#d66853";
+                    updateStyle(rateLimitButton, `Delay Task OFF`, "#fe815f")
+                    break;
+                default:
+                    break;
+            }
+        })
+
+        const RateLimitChecker = document.createElement("button");
+        statisticsElement.appendChild(RateLimitChecker);
+
+        updateSwitchState(RateLimitChecker, rateL, "429 Check", ["🔔", "🔕"])
+        styleButtons(RateLimitChecker, null, null)
+
+        RateLimitChecker.addEventListener("click", function() {
+            switch (rateL) {
+                case false:
+                    rateL = true
+                    updateSwitchState(RateLimitChecker, rateL, "429 Check", ["🔔", "🔕"])
+                    requestListener()
+                    break;
+                case true:
+                    rateL = false
+                    updateSwitchState(RateLimitChecker, rateL, "429 Check", ["🔔", "🔕"])
                     break;
                 default:
                     break;
