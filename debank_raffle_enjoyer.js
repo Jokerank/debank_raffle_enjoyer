@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.7.0
+// @version      0.7.1
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -206,7 +206,7 @@
             let drawToken = "JoinDrawModal_tokenDesc__1PIxe" // Номер токена
             let joinTheLuckyDraw = "Button_button__1yaWD Button_is_primary__1b4PX JoinDrawModal_submitBtn__RJXvp" // Join The Lucky Draw
             let closeButton = "CommonModal_closeModalButton__1swng" // Кнопка для закрытия
-            let qualified = "JoinDrawModal_inValidTag__3Sfee"
+            let qualified = "InteractPermissions_inValidTag__2UemM" // class changed
             let prizeTitle = "RichTextView_prizeTitle__5wXAk"
             let FollowingLimitReached = "FollowLimitModal_container__MJWF8"
 
@@ -349,7 +349,9 @@
                 if (state) {
                     styleButtons(button, "Running DeBank Enjoyer 🫡", "#ef7c39", "180px", "32px")
                 }
-                let feedListItem = document.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
+                
+                let visibleFeed = document.getElementsByClassName("ListContainer_streamListWrap__3w26c ListContainer_isVisible__13Ye8")[0] // devs again changed something
+                let feedListItem = visibleFeed.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
                 
                 if (feedListItem.length != 0 && state) {
                     console.log(`Loaded ${feedListItem.length} post/s`)
