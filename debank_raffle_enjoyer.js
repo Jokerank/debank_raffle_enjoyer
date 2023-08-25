@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.7.1
+// @version      0.7.3
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -20,7 +20,7 @@
     let errors = 0
 
     // Function to execute the main script
-    let switchForCustomPrice = true
+    let switchForCustomPrize = true
 
     let state = false
     let switchForRandT = false
@@ -147,12 +147,31 @@
         const originalFetch = window.fetch;
             window.fetch = async function (url, options) {
                 const response = await originalFetch(url, options)
-
                 if (rateL) {
+                const responseClone = await response.clone()
+                let responseDataObject
+                try {
+                    responseDataObject = await responseClone.json();
+                } catch (err) {
+                    console.error('Error parsing JSON:', err);
+                }
+                
+                // console.log(responseDataObject)
+                
                     // console.log(response.status)
+                    // Тут простая проверка на ерроры с сервера
+                    if (responseDataObject.error_code === 1) {
+                        if (responseDataObject.error_msg == "You've hit your 24-hour join Lucy draw limit based on your Web3 Social Ranking") {
+                            alert(`${responseDataObject.error_msg} 🥲\nThe script will be disabled 🫡`)
+                            state = false
+                            styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
+                            rateL = false
+                            updateSwitchState(RateLimitChecker, rateL, "Request 👂", ["🔔", "🔕"])
+                        }
+                    }
 
                     if (response.status === 429) {
-                            alert("You got a rate limit, maybe u need to edit some settings 🥲 The script will be disabled 🫡")
+                            alert("You got a rate limit, maybe u need to edit some settings 🥲\nThe script will be disabled 🫡")
                             state = false
                             styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
                     }
@@ -207,7 +226,7 @@
             let joinTheLuckyDraw = "Button_button__1yaWD Button_is_primary__1b4PX JoinDrawModal_submitBtn__RJXvp" // Join The Lucky Draw
             let closeButton = "CommonModal_closeModalButton__1swng" // Кнопка для закрытия
             let qualified = "InteractPermissions_inValidTag__2UemM" // class changed
-            let prizeTitle = "RichTextView_prizeTitle__5wXAk"
+            let prizeTitle = "DrawCard_prizeTitle__17X5G"
             let FollowingLimitReached = "FollowLimitModal_container__MJWF8"
 
             let notifyOnlyOnce = 0
@@ -244,10 +263,10 @@
                 if (!buttonElement) { // И тут закомментировать строку
                     skip = true
                 } else {
-                    if (!switchForCustomPrice) {
+                    if (!switchForCustomPrize) {
                         skip = false
                     } else {
-                        if (postTYPE == 'CUSTOM PRIZE' && switchForCustomPrice) {
+                        if (postTYPE == 'CUSTOM PRIZE' && switchForCustomPrize) {
                             skip = true
                         } else if (postTYPE === undefined || null) {
                             skip = true
@@ -303,21 +322,26 @@
                         }
 
                         let interval = setInterval(() => {
-                            let join = document.getElementsByClassName(joinTheLuckyDraw)
-                            if (join.length == 1) {
-                                join[0].click()
-                            }
-                            let congrats = document.getElementsByClassName(successTitle)
-                            if (congrats.length == 1) {
-                                try {
-                                    let close = document.getElementsByClassName(closeButton)
-                                    close[0].click()
-                                    clearInterval(interval)
-                                    ++success
-                                } catch (err) {
-                                    console.log(err)
-                                    ++errors
+                            if (state) { // после остановки интервал не сбрасывался в некоторых случаях, фикс
+                                let join = document.getElementsByClassName(joinTheLuckyDraw)
+                                if (join.length == 1) {
+                                    join[0].click()
                                 }
+                                let congrats = document.getElementsByClassName(successTitle)
+                                if (congrats.length == 1) {
+                                    try {
+                                        let close = document.getElementsByClassName(closeButton)
+                                        close[0].click()
+                                        clearInterval(interval)
+                                        ++success
+                                    } catch (err) {
+                                        console.log(err)
+                                        ++errors
+                                    }
+                                }
+                            }
+                            else {
+                                clearInterval(interval)
                             }
                         }, 1000);
                     }
@@ -442,17 +466,17 @@
     statisticsElement.appendChild(document.createElement("br"));
     statisticsElement.appendChild(switchButton);
 
-    styleButtons(switchButton, "Skip Custom Price ON 👌", "#00c087", "180px", "32px")
+    styleButtons(switchButton, "Skip Custom Prize ON 👌", "#00c087", "180px", "32px")
 
     switchButton.addEventListener("click", function() {
-            switch (switchForCustomPrice) {
+            switch (switchForCustomPrize) {
                 case true:
-                    switchForCustomPrice = false
-                    updateStyle(switchButton, `Skip Custom Price OFF 🥴`, "#fe815f")
+                    switchForCustomPrize = false
+                    updateStyle(switchButton, `Skip Custom Prize OFF 🥴`, "#fe815f")
                     break;
                 case false:
-                    switchForCustomPrice = true
-                    updateStyle(switchButton, `Skip Custom Price ON 👌`, "#00c087")
+                    switchForCustomPrize = true
+                    updateStyle(switchButton, `Skip Custom Prize ON 👌`, "#00c087")
                     break;
                 default:
                     break;
@@ -603,19 +627,19 @@
         const RateLimitChecker = document.createElement("button");
         statisticsElement.appendChild(RateLimitChecker);
 
-        updateSwitchState(RateLimitChecker, rateL, "429 Check", ["🔔", "🔕"])
+        updateSwitchState(RateLimitChecker, rateL, "Request 👂", ["🔔", "🔕"])
         styleButtons(RateLimitChecker, null, null)
 
         RateLimitChecker.addEventListener("click", function() {
             switch (rateL) {
                 case false:
                     rateL = true
-                    updateSwitchState(RateLimitChecker, rateL, "429 Check", ["🔔", "🔕"])
+                    updateSwitchState(RateLimitChecker, rateL, "Request 👂", ["🔔", "🔕"])
                     requestListener()
                     break;
                 case true:
                     rateL = false
-                    updateSwitchState(RateLimitChecker, rateL, "429 Check", ["🔔", "🔕"])
+                    updateSwitchState(RateLimitChecker, rateL, "Request 👂", ["🔔", "🔕"])
                     break;
                 default:
                     break;
