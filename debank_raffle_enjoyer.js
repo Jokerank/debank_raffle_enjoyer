@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.7.3
+// @version      0.7.3.1
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -161,7 +161,7 @@
                     // console.log(response.status)
                     // Тут простая проверка на ерроры с сервера
                     if (responseDataObject.error_code === 1) {
-                        if (responseDataObject.error_msg == "You've hit your 24-hour join Lucy draw limit based on your Web3 Social Ranking") {
+                        if (responseDataObject.error_msg == "You've hit your 24-hour join Lucky draw limit based on your Web3 Social Ranking") {
                             alert(`${responseDataObject.error_msg} 🥲\nThe script will be disabled 🫡`)
                             state = false
                             styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
