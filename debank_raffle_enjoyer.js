@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         debank_raffle_enjoyer
 // @namespace    http://tampermonkey.net/
-// @version      0.7.3.1
+// @version      0.7.4
 // @description  DeBank automatic raffles joiner!
 // @author       Jokerank
 // @match        *://*debank.com/*
@@ -74,75 +74,6 @@
     }
 
     async function requestListener() {
-        // Никуда ничего не отправляется, relax
-        // По дефолту выключен - Кнопка 429 Check
-        // Alert рейтлимита просто пример и выключение скрипта
-        // Тут можно очень грязные штуки делать, по типу редиректов реквестов, пытался делать сортировку только по гивам, но это привело к проблемам
-        // Сделал редирект новостной ленты с мейна на твинк, все работало кроме кое каких моментов, в объекте есть is_following и is_joined, т.е выводится лента сразу с
-        // заполненными значениями, если перезаписать их, скрипт будет пытаться зафолловиться (даже если подписан) или зайти (даже если уже зашел), и быстро ловить 429
-        // Т.е надо переписывать всю логику и как то запиливать подгрузку, пытался подменить пару фоновых запросов, но это не привело к подгрузке гивов.
-        // После вывода онли гивов не работает нативная подгрузка остальных постов 🫡
-
-        // Пример модификации запроса:
-        // let account = "тут ваш акк random_id и прочая хрень которая передается в запросах почти всех" // Найти можно в F12 - Network - Headers - Request Headers - Account:
-        // if (url.includes('https://api.debank.com/feed/list?limit=50&create_at=' && turn)) {
-        //         // Тут идет парс таймштампа который в оригинальном запросе
-        //         let regex = /create_at=([\d.]+)/;
-        //         let match = regex.exec(url);
-        //         let extractedValue = match ? match[1] : null;
-        // let address = "0xВашАдрес"
-        // // Тут вставляем хедерсы свои, в таком формате, переменную аккаунт берем сверху, костыльный обход x-api генерации
-        // let customHeaders = {
-        //     "accept": "*/*",
-        //     "accept-language": "",
-        //     "account": account,
-        //     "sec-ch-ua": "",
-        //     "sec-ch-ua-mobile": "",
-        //     "sec-ch-ua-platform": "",
-        //     "sec-fetch-dest": "",
-        //     "sec-fetch-mode": "",
-        //     "sec-fetch-site": "",
-        //     "source": "",
-        // }
-        //  // Редирект адреса на другой
-        //         url = `https://api.debank.com/feed/list?limit=50&create_at=${extractedValue}&user_id=${address}`
-        //         // Объединение существующих заголовков с вашими заголовками
-        //         const newHeaders = { ...options.headers, ...customHeaders };
-        
-        //         // Переопределение объекта опций запроса с новыми заголовками
-        //         options = {
-        //             ...options,
-        //             headers: newHeaders,
-        //         };
-        
-        //         const response = await originalFetch(url, options);
-        //         const responseClone = await response.clone()
-        //         let responseDataObject;
-        //         try {
-        //             responseDataObject = await responseClone.json();
-        //         } catch (error) {
-        //             // Обработка ошибок при парсинге JSON
-        //             console.error('Error parsing JSON:', error);
-        //             return response; // Возвращаем оригинальный ответ без изменений
-        //         }
-        //         // console.log(responseDataObject);
-        //         // Важная функция, выполняет модификацию объекта который получен в запросе, с ним можно играть как душе угодно, выводить онли гивы как и писал, редактировать is_following, is_joined и т.д
-        //         function modifyArray(responseDataObject) {
-        //             return responseDataObject.data.feeds.map(item => {
-        //             let modifiedItem = { ...item };
-        //             // Модифицируем "is_following" и "is_joined"
-        //             if (modifiedItem.article.draw_id != undefined || null) {
-        //                 modifiedItem.article.creator.is_following = false
-        //                 modifiedItem.article.draw.is_joined = false
-        //             }
-        //             return modifiedItem;
-        //         })}
-               
-        //         modifyArray(responseDataObject);
-               
-        //         return new Response(JSON.stringify(responseDataObject), response);
-        //     }
-        // // Если придумаю что-то, запилю апдейт, но скорее всего это последний 🥲
 
         const originalFetch = window.fetch;
             window.fetch = async function (url, options) {
@@ -240,25 +171,16 @@
                     
                 }
                 
-                let buttonElement = element.querySelector('button');
+                let buttonElement = element.querySelectorAll('button');
+                if (buttonElement.length > 1) {
+                    buttonElement = buttonElement[buttonElement.length - 1];
+                } else {
+                    buttonElement = buttonElement[0]
+                }
                 let trustButton = element.getElementsByClassName("ArticleContent_opIconWrap__3YjdX")[3]
                 let repostButton = element.getElementsByClassName("ArticleContent_opIconWrap__3YjdX")[1]
 
                 let skip = false
-                
-                // // Сомнительная штука т.к иногда посты внизу вылазят, с розыгрышами которые новые, если кто читает можете потестить и раскомментировать, остановка при 'Sorry, you did not get the prize'
-                // // По логике это должны быть старые посты, которые уже нет смысла просто так листать
-                // // Выделить весь блок + нажать CTRL+ /
-                // if (postTYPE == 'CASH PRIZE' && thickDesc == 'Sorry, you did not get the prize') {
-                //     if (notifyOnlyOnce == 0) {
-                //         alert("Looks like posts for today are over.")
-                //         ++notifyOnlyOnce
-                //     }
-                //     skip = true
-                //     state = false
-                //     styleButtons(button, "Run DeBank Enjoyer 🫡", "#4CAF50", "180px", "32px")
-                // }
-                // else if (!buttonElement) {
 
                 if (!buttonElement) { // И тут закомментировать строку
                     skip = true
@@ -375,7 +297,11 @@
                 }
                 
                 let visibleFeed = document.getElementsByClassName("ListContainer_streamListWrap__3w26c ListContainer_isVisible__13Ye8")[0] // devs again changed something
-                let feedListItem = visibleFeed.getElementsByClassName("ArticleContent_articleMain__2EFKB FeedListItem_content__2XFtk")
+                if (!visibleFeed) {
+                    // Фолловинг фикс
+                    visibleFeed = document.getElementsByClassName("StreamTab_streamMain__3afzt")[0]  
+                }
+                let feedListItem = visibleFeed.getElementsByClassName("FeedListItem_streamListItem__1TJ_q")
                 
                 if (feedListItem.length != 0 && state) {
                     console.log(`Loaded ${feedListItem.length} post/s`)
